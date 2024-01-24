@@ -18,7 +18,10 @@ public:
 	 cApplication( void );
 	~cApplication( void );
 
+	void onCreate() override;
+
 	void run    ( void );
+	cRenderer* getRenderer() { return m_renderer; }
 
 private:
 

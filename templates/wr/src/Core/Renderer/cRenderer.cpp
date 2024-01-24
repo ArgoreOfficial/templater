@@ -2,7 +2,7 @@
 
 #include <Core/Renderer/backends/cBackend_OpenGL.h>
 #include <Core/Renderer/backends/cBackend_D3D11.h>
-#include <Core/Renderer/Shader/iShader.h>
+
 cRenderer::cRenderer( void ):
 	m_backend{ nullptr }
 {
@@ -33,6 +33,11 @@ void cRenderer::create( cWindow& _window, cRenderer::eBackendType _backend )
 	createDefaultShader();
 }
 
+sShader cRenderer::createShader( const char* _source, eShaderType _type )
+{
+    return m_backend->createShader( _source, _type );
+}
+
 void cRenderer::clear( unsigned int _color )
 {
 	m_backend->clear( _color );
@@ -48,14 +53,9 @@ void cRenderer::endFrame( void )
 	m_backend->endFrame();
 }
 
-void cRenderer::drawPointCloud( cPointCloud& _point_cloud )
-{
-	
-}
-
 void cRenderer::createDefaultShader( void )
 {
-	iShader* vertex_shader = m_backend->createShader( m_default_vertex_shader_source, eShaderType::Vertex );
-	iShader* fragment_shader = m_backend->createShader( m_default_fragment_shader_source, eShaderType::Fragment );
+	sShader vertex_shader = m_backend->createShader( m_shader_default_vert, eShaderType::Shader_Vertex );
+	sShader fragment_shader = m_backend->createShader( m_shader_default_frag, eShaderType::Shader_Fragment );
 	m_shader_default = m_backend->createShaderProgram( vertex_shader, fragment_shader );
 }

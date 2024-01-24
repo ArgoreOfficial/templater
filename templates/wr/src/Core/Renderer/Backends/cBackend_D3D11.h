@@ -17,6 +17,7 @@ public:
 	
 	void beginFrame( void ) override;
 	void endFrame  ( void ) override;
+
 private:
 
 	int createSwapchainResources();

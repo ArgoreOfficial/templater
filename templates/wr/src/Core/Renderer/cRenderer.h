@@ -5,6 +5,9 @@ class iShader;
 class cWindow;
 class cPointCloud;
 
+#include <Core/Renderer/Framework/Shader.h>
+#include <Core/Renderer/Framework/Buffer.h>
+
 class cRenderer 
 {
 public:
@@ -18,30 +21,34 @@ public:
 	~cRenderer( void );
 	
 	void create( cWindow& _window, cRenderer::eBackendType _backend );
+	sShader createShader( const char* _source, eShaderType _type );
 
 	void clear( unsigned int _color );
 
 	void beginFrame( void );
 	void endFrame  ( void );
-
-	unsigned int getDefaultShader( void ) const { return m_shader_default; }
 	
-	void drawPointCloud( cPointCloud& _point_cloud );
-
+	hShaderProgram getDefaultShader( void ) const { return m_shader_default; }
+	iBackend* getBackend( void ) { return m_backend; }
+	
 private:
+
 	void createDefaultShader( void );
 
 	iBackend* m_backend = nullptr;
 
-	const char* m_default_vertex_shader_source = 
+	const char* m_shader_default_vert =
 		"#version 330 core\n"
 		"layout (location = 0) in vec3 aPos;\n"
+		"uniform mat4 proj;\n"
+		"uniform mat4 view;\n"
+		"uniform mat4 model;\n"
 		"void main()\n"
 		"{\n"
-		"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+		"   gl_Position = proj * view * model * vec4(aPos, 1.0);\n"
 		"}\0";
 
-	const char* m_default_fragment_shader_source =
+	const char* m_shader_default_frag =
 		"#version 330 core\n"
 		"out vec4 FragColor;\n"
 		"void main()\n"
@@ -49,5 +56,5 @@ private:
 		"	FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
 		"}\0";
 	
-	unsigned int m_shader_default = 0;
+	hShaderProgram m_shader_default;
 };

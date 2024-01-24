@@ -4,7 +4,5 @@
 
 int main()
 {
-	cApplication::create();
 	cApplication::getInstance().run();
-	cApplication::destroy();
 }
