@@ -30,7 +30,7 @@ group ""
 project (PROJECT_NAME)
 	kind "ConsoleApp"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 
 	targetdir "../../bin"
 	objdir "../../bin/obj/"

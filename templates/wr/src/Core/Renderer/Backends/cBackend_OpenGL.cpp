@@ -120,25 +120,29 @@ hShaderProgram cBackend_OpenGL::createShaderProgram( sShader& _vertex_shader, sS
 	return program;
 }
 
+int getBufferTarget_OpenGL( eBufferType _type )
+{
+	switch ( _type )
+	{
+	case eBufferType::Buffer_Vertex:
+		return GL_ARRAY_BUFFER;
+		break;
+	case eBufferType::Buffer_Index:
+		return GL_ELEMENT_ARRAY_BUFFER;
+		break;
+	}
+
+	return GL_NONE;
+}
+
 sBuffer cBackend_OpenGL::createBuffer( eBufferType _type )
 {
 	hBuffer buffer = 0;
 	glGenBuffers( 1, &buffer );
-	int target = GL_NONE;
-
-	switch ( _type )
-	{
-	case eBufferType::Buffer_Vertex:
-		target = GL_ARRAY_BUFFER;
-		break;
-	case eBufferType::Buffer_Index:
-		target = GL_ELEMENT_ARRAY_BUFFER;
-		break;
-	default:
+	int target = getBufferTarget_OpenGL( _type );
+	if( !target )
 		return { 0, eBufferType::Buffer_None };
-		break;
-	}
-	
+
 	glBindBuffer( target, buffer );
 
 	return { buffer, _type };
@@ -158,20 +162,9 @@ void cBackend_OpenGL::useShaderProgram( hShaderProgram _program )
 
 void cBackend_OpenGL::bufferData( sBuffer& _buffer, void* _data, size_t _size )
 {
-	int target = GL_NONE;
-
-	switch ( _buffer.type )
-	{
-	case eBufferType::Buffer_Vertex:
-		target = GL_ARRAY_BUFFER;
-		break;
-	case eBufferType::Buffer_Index:
-		target = GL_ELEMENT_ARRAY_BUFFER;
-		break;
-	default:
+	int target = getBufferTarget_OpenGL( _buffer.type );
+	if ( !target )
 		return;
-		break;
-	}
 
 	glBufferData( target, _size, _data, GL_DYNAMIC_DRAW ); /* move usage to buffer object */
 	
@@ -215,14 +208,32 @@ void cBackend_OpenGL::bindVertexArray( hVertexArray _vertex_array )
 	glBindVertexArray( _vertex_array );
 }
 
-void cBackend_OpenGL::drawArrays( unsigned int _vertex_count )
+int getPrimitive_OpenGL( eDrawMode _mode )
 {
-	glDrawArrays( GL_POINTS, 0, _vertex_count );
+	switch ( _mode )
+	{
+	case eDrawMode::DrawMode_Lines:
+		return GL_LINES;
+		break;
+	case eDrawMode::DrawMode_Points:
+		return GL_POINTS;
+		break;
+	case eDrawMode::DrawMode_Triangle:
+		return GL_TRIANGLES;
+		break;
+	}
+
+	return GL_LINES;
 }
 
-void cBackend_OpenGL::drawElements( unsigned int _index_count )
+void cBackend_OpenGL::drawArrays( unsigned int _vertex_count, eDrawMode _mode )
 {
-	glDrawElements( GL_TRIANGLES, _index_count, GL_UNSIGNED_INT, 0 );
+	glDrawArrays( getPrimitive_OpenGL( _mode ), 0, _vertex_count);
+}
+
+void cBackend_OpenGL::drawElements( unsigned int _index_count, eDrawMode _mode )
+{
+	glDrawElements( getPrimitive_OpenGL( _mode ), _index_count, GL_UNSIGNED_INT, 0 );
 }
 
 int cBackend_OpenGL::getUniformLocation( hShaderProgram _shader, const char* _uniform )

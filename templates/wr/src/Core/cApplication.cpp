@@ -5,7 +5,10 @@
 #include <Core/cWindow.h>
 #include <Core/Renderer/cRenderer.h>
 
+#include <iostream>
 #include <fstream>
+#include <string>
+#include <format>
 
 cApplication::cApplication() :
 	m_window{ new cWindow() },
@@ -21,7 +24,7 @@ cApplication::~cApplication()
 
 void cApplication::onCreate()
 {
-	m_window->create( 800, 600, "renderer idfk" );
+	m_window->create( 1500, 1000, "renderer idfk" );
 	m_renderer->create( *m_window, cRenderer::eBackendType::OpenGL );
 
 	m_scene->create();
@@ -35,13 +38,21 @@ void cApplication::onResize( int _width, int _height )
 
 void cApplication::run()
 {
-	
+	double time = m_window->getTime();;
+	double delta_time = 0.0;
+
 	while ( !m_window->shouldClose() )
 	{
+		double now = m_window->getTime();
+		delta_time = now - time;
+		time = now;
+		
+		m_window->setTitle( std::format( "N-Body FPS: {}", ( 1.0 / delta_time ) ).c_str() );
+
 		m_window->beginFrame();
 		m_renderer->beginFrame();
 
-		m_scene->update( 0.0f );
+		m_scene->update( delta_time );
 
 		m_renderer->clear( 0x000000FF );
 

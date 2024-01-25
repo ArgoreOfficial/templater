@@ -7,6 +7,13 @@ class cVertexLayout;
 #include <Core/Renderer/Framework/Buffer.h>
 #include <Core/Renderer/Framework/VertexArray.h>
 
+enum eDrawMode
+{
+	DrawMode_Points,
+	DrawMode_Lines,
+	DrawMode_Triangle
+};
+
 class iBackend
 {
 public:
@@ -32,8 +39,8 @@ public:
 	virtual void bindVertexLayout( cVertexLayout& _layout ) { }
 	virtual void bindVertexArray( hVertexArray _vertex_array ) { }
 
-	virtual void drawArrays( unsigned int _vertex_count ) { }
-	virtual void drawElements( unsigned int _index_count ) { }
+	virtual void drawArrays( unsigned int _vertex_count, eDrawMode _mode ) { }
+	virtual void drawElements( unsigned int _index_count, eDrawMode _mode ) { }
 
 	virtual int getUniformLocation( hShaderProgram _shader, const char* _uniform ) { return -1; }
 	virtual void setUniformMat4f( int _location, float* _matrix_ptr ) { }

@@ -25,8 +25,8 @@ public:
 	void bindVertexLayout( cVertexLayout& _layout ) override;
 	void bindVertexArray( hVertexArray _vertex_array ) override;
 
-	void drawArrays( unsigned int _vertex_count ) override;
-	void drawElements( unsigned int _index_count ) override;
+	void drawArrays( unsigned int _vertex_count, eDrawMode _mode ) override;
+	void drawElements( unsigned int _index_count, eDrawMode _mode ) override;
 
 	int getUniformLocation( hShaderProgram _shader, const char* _uniform ) override;
 	void setUniformMat4f( int _location, float* _matrix_ptr ) override;

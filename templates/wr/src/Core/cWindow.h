@@ -27,7 +27,8 @@ public:
 	GLFWwindow* const getWindowObject( void ) { return m_window_object; }
 	unsigned int getWidth ( void ) const { return m_width; }
 	unsigned int getHeight( void ) const { return m_height; }
-
+	double getTime();
+	void setTitle( const char* _title );
 private:
 
 	GLFWwindow* m_window_object = nullptr;

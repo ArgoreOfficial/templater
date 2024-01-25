@@ -6,6 +6,8 @@
 #include <Core/Renderer/cRenderer.h>
 #include <vector>
 
+#include <App/cOctree.h>
+
 class cVector3f
 {
 public:
@@ -82,7 +84,7 @@ private:
 	hVertexArray m_vertex_array;
 	sBuffer m_vertex_buffer;
 
-	std::vector<sPoint> m_points;
+	cOctree m_octree;
 
-	const double BIG_G = 6.67e-11;
+	std::vector<sPoint> m_points;
 };

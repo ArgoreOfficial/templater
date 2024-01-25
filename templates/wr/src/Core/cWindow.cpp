@@ -87,3 +87,13 @@ void cWindow::onResize( int _width, int _height )
 	m_width = _width;
 	m_height = _height;
 }
+
+double cWindow::getTime()
+{
+    return glfwGetTime();
+}
+
+void cWindow::setTitle( const char* _title )
+{
+	glfwSetWindowTitle( m_window_object, _title );
+}
