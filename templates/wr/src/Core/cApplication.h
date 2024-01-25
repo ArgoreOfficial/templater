@@ -5,6 +5,7 @@ class cWindow;
 class iScene;
 
 #include <Core/Misc/iSingleton.h>
+#include <string>
 
 class cApplication : public iSingleton<cApplication>
 {
@@ -19,9 +20,12 @@ public:
 	~cApplication( void );
 
 	void onCreate() override;
-
+	void onResize( int _width, int _height );
+	cWindow* getWindow() { return m_window; }
 	void run    ( void );
 	cRenderer* getRenderer() { return m_renderer; }
+
+	std::string loadShaderSource( const char* _path );
 
 private:
 

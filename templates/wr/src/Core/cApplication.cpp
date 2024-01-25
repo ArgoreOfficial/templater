@@ -5,6 +5,8 @@
 #include <Core/cWindow.h>
 #include <Core/Renderer/cRenderer.h>
 
+#include <fstream>
+
 cApplication::cApplication() :
 	m_window{ new cWindow() },
 	m_renderer{ new cRenderer() },
@@ -25,6 +27,12 @@ void cApplication::onCreate()
 	m_scene->create();
 }
 
+void cApplication::onResize( int _width, int _height )
+{
+	m_renderer->onResize( _width, _height );
+	m_window->onResize( _width, _height );
+}
+
 void cApplication::run()
 {
 	
@@ -42,5 +50,18 @@ void cApplication::run()
 		m_renderer->endFrame();
 		m_window->endFrame();
 	}
+}
+
+std::string cApplication::loadShaderSource( const char* _path )
+{
+	std::string line, text;
+	std::ifstream in( _path );
+
+	while ( std::getline( in, line ) )
+	{
+		text += line + "\n";
+	}
+	
+	return text;
 }
 

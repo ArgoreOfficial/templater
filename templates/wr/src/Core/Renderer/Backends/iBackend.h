@@ -16,7 +16,7 @@ public:
 	virtual void clear  ( unsigned int _color ) { }
 	virtual void destroy( void ) { }
 
-	virtual void onResize( void ) { }
+	virtual void onResize( int _width, int _height ) { }
 
 	virtual void beginFrame( void ) { }
 	virtual void endFrame  ( void ) { }

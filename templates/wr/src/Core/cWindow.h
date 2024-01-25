@@ -18,6 +18,12 @@ public:
 
 	bool shouldClose( void ) const { return glfwWindowShouldClose( m_window_object ); }
 
+	unsigned int getWidth() { return m_width; }
+	unsigned int getHeight() { return m_height; }
+	float getAspect();
+
+	void onResize( int _width, int _height );
+
 	GLFWwindow* const getWindowObject( void ) { return m_window_object; }
 	unsigned int getWidth ( void ) const { return m_width; }
 	unsigned int getHeight( void ) const { return m_height; }

@@ -1,7 +1,13 @@
 #include "cWindow.h"
 
+#include <Core/cApplication.h>
+
 #include <stdio.h>
 
+void onResizeCallback( GLFWwindow* window, int _width, int _height )
+{
+	cApplication::getInstance().onResize( _width, _height );
+}
 
 void processInput( GLFWwindow* window )
 {
@@ -43,6 +49,8 @@ int cWindow::create( unsigned int _width, unsigned int _height, const char* _tit
 	}
 	glfwMakeContextCurrent( m_window_object );
 
+	glfwSetFramebufferSizeCallback( m_window_object, onResizeCallback );
+
 	m_width = _width;
 	m_height = _height;
 
@@ -64,4 +72,18 @@ void cWindow::endFrame( void )
 {
 	glfwSwapBuffers( m_window_object );
 	glfwPollEvents();
+}
+
+float cWindow::getAspect()
+{
+	if ( m_width == 0 || m_height == 0 )
+		return 1.0f;
+
+	return (float)m_width / (float)m_height;
+}
+
+void cWindow::onResize( int _width, int _height )
+{
+	m_width = _width;
+	m_height = _height;
 }

@@ -23,6 +23,7 @@ public:
 	void create( cWindow& _window, cRenderer::eBackendType _backend );
 	sShader createShader( const char* _source, eShaderType _type );
 
+	void onResize( int _width, int _height );
 	void clear( unsigned int _color );
 
 	void beginFrame( void );
@@ -53,7 +54,7 @@ private:
 		"out vec4 FragColor;\n"
 		"void main()\n"
 		"{\n"
-		"	FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+		"	FragColor = vec4( 1.0f, 1.0f, 1.0f, 1.0f );\n"
 		"}\0";
 	
 	hShaderProgram m_shader_default;

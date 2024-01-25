@@ -57,6 +57,11 @@ void cBackend_OpenGL::clear( unsigned int _color )
 	glClear( GL_COLOR_BUFFER_BIT );
 }
 
+void cBackend_OpenGL::onResize( int _width, int _height )
+{
+	glViewport( 0, 0, _width, _height );
+}
+
 sShader cBackend_OpenGL::createShader( const char* _source, eShaderType _type )
 {
 	int  success;
@@ -168,7 +173,7 @@ void cBackend_OpenGL::bufferData( sBuffer& _buffer, void* _data, size_t _size )
 		break;
 	}
 
-	glBufferData( target, _size, _data, GL_STATIC_DRAW ); /* move usage to buffer object */
+	glBufferData( target, _size, _data, GL_DYNAMIC_DRAW ); /* move usage to buffer object */
 	
 }
 
@@ -180,8 +185,6 @@ void cBackend_OpenGL::bindVertexLayout( cVertexLayout& _layout )
 	for ( unsigned int i = 0; i < elements.size(); i++ )
 	{
 		const auto& element = elements[ i ];
-
-		glEnableVertexAttribArray( i );
 
 		GLenum type = GL_UNSIGNED_BYTE;
 
@@ -196,9 +199,12 @@ void cBackend_OpenGL::bindVertexLayout( cVertexLayout& _layout )
 		case cVertexLayout::Byte:
 			type = GL_UNSIGNED_BYTE;
 			break;
+		case cVertexLayout::Double:
+			type = GL_DOUBLE;
+			break;
 		}
 
-		// normalized is always false here, though it can be easily changed
+		glEnableVertexAttribArray( i );
 		glVertexAttribPointer( i, element.count, type, false, _layout.getStride(), (const void*)offset );
 		offset += element.count * element.size;
 	}
@@ -211,7 +217,7 @@ void cBackend_OpenGL::bindVertexArray( hVertexArray _vertex_array )
 
 void cBackend_OpenGL::drawArrays( unsigned int _vertex_count )
 {
-	glDrawArrays( GL_TRIANGLES, 0, _vertex_count );
+	glDrawArrays( GL_POINTS, 0, _vertex_count );
 }
 
 void cBackend_OpenGL::drawElements( unsigned int _index_count )

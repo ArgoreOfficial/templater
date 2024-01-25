@@ -12,6 +12,8 @@ public:
 	void create( cWindow& _window ) override;
 	void clear( unsigned int _color ) override;
 	
+	void onResize( int _width, int _height ) override;
+
 	sShader createShader( const char* _source, eShaderType _type ) override;
 	hShaderProgram createShaderProgram( sShader& _vertex_shader, sShader& _fragment_shader ) override;
 	sBuffer createBuffer( eBufferType _type ) override;

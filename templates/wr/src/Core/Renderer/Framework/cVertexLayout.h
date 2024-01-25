@@ -9,7 +9,8 @@ public:
     {
         Float,
         Uint,
-        Byte
+        Byte,
+		Double
     };
 
 	struct sLayoutElement
@@ -36,23 +37,31 @@ private:
 template<>
 inline void cVertexLayout::push<float>( unsigned int _count )
 {
-	size_t size = sizeof( float ) * _count;
-    m_stride += size;
+	size_t size = sizeof( float );
+    m_stride += size * _count;
 	m_elements.push_back( { eType::Float, _count, size } );
 }
 
 template<>
 inline void cVertexLayout::push<unsigned char>( unsigned int _count )
 {
-	size_t size = sizeof( unsigned char ) * _count;
-	m_stride += size;
+	size_t size = sizeof( unsigned char );
+	m_stride += size * _count;
 	m_elements.push_back( { eType::Byte, _count, size } );
 }
 
 template<>
 inline void cVertexLayout::push<unsigned int>( unsigned int _count )
 {
-	size_t size = sizeof( unsigned int ) * _count;
-	m_stride += size;
+	size_t size = sizeof( unsigned int );
+	m_stride += size * _count;
 	m_elements.push_back( { eType::Uint, _count, size } );
+}
+
+template<>
+inline void cVertexLayout::push<double>( unsigned int _count )
+{
+	size_t size = sizeof( double );
+	m_stride += size * _count;
+	m_elements.push_back( { eType::Double, _count, size } );
 }

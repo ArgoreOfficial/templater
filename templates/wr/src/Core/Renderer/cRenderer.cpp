@@ -38,6 +38,11 @@ sShader cRenderer::createShader( const char* _source, eShaderType _type )
     return m_backend->createShader( _source, _type );
 }
 
+void cRenderer::onResize( int _width, int _height )
+{
+	m_backend->onResize( _width, _height );
+}
+
 void cRenderer::clear( unsigned int _color )
 {
 	m_backend->clear( _color );
