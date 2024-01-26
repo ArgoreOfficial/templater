@@ -1,0 +1,1 @@
+start "" "D:/duckstation/duckstation-qt-x64-ReleaseLTCG.exe" %~dp0build/game.exe
