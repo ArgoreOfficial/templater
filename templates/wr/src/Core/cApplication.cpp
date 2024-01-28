@@ -8,7 +8,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <format>
 
 cApplication::cApplication() :
 	m_window{ new cWindow() },
@@ -52,8 +51,6 @@ void cApplication::run()
 		delta_time = now - time;
 		time = now;
 		
-		m_window->setTitle( std::format( "N-Body FPS: {}", ( 1.0 / delta_time ) ).c_str() );
-
 		m_window->beginFrame();
 		m_renderer->beginFrame();
 

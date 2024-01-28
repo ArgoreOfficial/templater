@@ -8,6 +8,8 @@
 #include <Core/Renderer/cRenderer.h>
 #include <App/sPoint.h>
 
+#include <App/SpaceMath.h>
+
 cNode::~cNode()
 {
 	parent = nullptr;
@@ -124,7 +126,7 @@ void cNode::clearChildren()
 		if ( children[ i ]->data )
 		{
 			com += children[ i ]->data->position * children[ i ]->data->mass;
-			combined_mass += children[ i ]->data->mass;
+			mass += children[ i ]->data->mass;
 		}
 	}
 
@@ -156,7 +158,7 @@ void cNode::clearChildren()
 void cNode::recalculateData()
 {
 	com = wv::cVector3d( 0.0, 0.0, 0.0 );
-	combined_mass = 0.0;
+	mass = 0.0;
 
 	checkParticleExited();
 
@@ -179,12 +181,67 @@ void cNode::accumulatePointMass()
 
 	while ( node )
 	{
-		node->combined_mass += data->mass;
+		node->mass += data->mass;
 		node->com += data->position * data->mass;
-		node->com /= node->combined_mass;
+		node->com /= node->mass;
 
 		node = node->parent;
 	}
+}
+
+void cNode::recalculateMass( double* _out_mass, wv::cVector3d* _out_com )
+{
+	mass = 0.0;
+	com.x = 0.0; 
+	com.y = 0.0;
+	com.z = 0.0;
+
+	if ( !is_leaf )
+	{
+		for ( int i = 0; i < 8; i++ )
+		{
+			children[ i ]->recalculateMass( &mass, &com );
+			mass += children[ i ]->mass;
+			com += children[ i ]->com * children[ i ]->mass;
+		}
+	}
+	
+	if ( data )
+	{
+		mass += data->mass;
+		com += data->position * data->mass;
+	}
+
+	if( mass > 0 )
+		com /= mass;
+}
+
+wv::cVector3d cNode::computeForces( sPoint* _point, const float& _theta )
+{
+	if ( data )
+	{
+		if ( _point == data )
+			return { 0.0, 0.0, 0.0 };
+
+		return SpaceMath::computeForce(_point->position, data->position, _point->mass, data->mass);
+	}
+
+	if ( is_leaf)
+		return { 0.0, 0.0, 0.0 };
+
+	double r = ( _point->position - com ).length();
+	double theta = size / r;
+	if ( theta <= _theta )
+	{
+		return SpaceMath::computeForce( _point->position, com, _point->mass, mass );
+	}
+
+	wv::cVector3d accumulated;
+
+	for ( int i = 0; i < 8; i++ )
+		accumulated += children[ i ]->computeForces( _point, _theta );
+	
+    return accumulated;
 }
 
 void cNode::draw( iBackend* _backend, int& _model_loc, double _scale )
@@ -209,9 +266,9 @@ void cNode::draw( iBackend* _backend, int& _model_loc, double _scale )
 
 void cNode::drawCOM( iBackend* _backend, int& _model_loc, double _scale )
 {
-	if ( !data )
+	if ( !is_leaf )
 	{
-		double mass_scale = _scale * 0.01f;
+		double mass_scale = _scale * 0.1f;
 		glm::mat4 model = glm::mat4( 1.0f );
 		model = glm::translate( model, glm::vec3( com.x * _scale, com.y * _scale, com.z * _scale ) );
 		model = glm::scale( model, glm::vec3{ size * mass_scale, size * mass_scale, size * mass_scale } );
@@ -219,11 +276,9 @@ void cNode::drawCOM( iBackend* _backend, int& _model_loc, double _scale )
 		_backend->setUniformMat4f( _model_loc, glm::value_ptr( model ) );
 		_backend->drawArrays( 24, eDrawMode::DrawMode_Lines );
 	}
-
-	if ( is_leaf )
-		return;
-
-	for ( int i = 0; i < 8; i++ )
-		if ( children[ i ] )
-			children[ i ]->drawCOM( _backend, _model_loc, _scale );
+	
+	if( !is_leaf )
+		for ( int i = 0; i < 8; i++ )
+			if ( children[ i ] )
+				children[ i ]->drawCOM( _backend, _model_loc, _scale );
 }

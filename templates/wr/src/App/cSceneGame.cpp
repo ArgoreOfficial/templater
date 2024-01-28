@@ -10,6 +10,9 @@
 
 #include <ctime>
 #include <string>
+#include <format>
+
+#include <App/SpaceMath.h>
 
 #define RANDF( _min, _max ) _min + (float)( rand() ) / ( (float)( RAND_MAX / ( _max - _min ) ) )
 #define RANDD( _min, _max ) _min + (double)( rand() ) / ( (double)( RAND_MAX / ( _max - _min ) ) )
@@ -40,6 +43,60 @@ double mapRange( double _x, double _min_in, double _max_in, double _min_out, dou
 	return _min_out + ( _max_out - _min_out ) * x;
 }
 
+void cSceneGame::createGalaxy( wv::cVector3d _center, wv::cVector3d _velocity, unsigned int _stars, const double _size, const double _mass_min, const double _mass_max, const double _black_hole_mass )
+{
+	int index_offset = m_points.size();
+	const double height = 4.0e18;
+
+	for ( int i = 0; i < _stars; i++ )
+	{
+		double t = RANDD( 0, 3.1415 * 2.0 );
+		double max_dist_temp = RANDD( _size * 0.05, _size );
+		double min_dist = _black_hole_mass / max_dist_temp;
+		double height_temp = RANDD( 0, height );
+		double dist = RANDD( _size * 0.05, max_dist_temp );
+		double s = sin( t ) * dist;
+		double c = cos( t ) * dist;
+
+		double mass = RANDD( _mass_min, _mass_max );
+		double v = 0.0f;
+
+		if ( i > 0 )
+			v = sqrt( BIG_G * _black_hole_mass / dist );
+
+		double s_prim = cos( t );
+		double c_prim = -sin( t );
+
+		/* position */
+		double x = s; // RANDF( -max_dist, max_dist );
+		double y = RANDD( -height_temp, height_temp );
+		double z = c; // RANDF( -max_dist, max_dist );
+
+		/* initial velocity */
+		double vel_x = s_prim * v; // RANDF( -max_speed, max_speed );
+		double vel_y = 0.0; // RANDF( -max_speed * 0.2, max_speed * 0.2 );
+		double vel_z = c_prim * v; // RANDF( -max_speed, max_speed );
+
+		/* star colour */
+		double bv = mapRange( mass, _mass_min, _mass_max, 2.0, -0.4 );
+		double l = mapRange( mass, _mass_min, _mass_max, 0.3, 1.0 );
+		double r = 0, g = 0, b = 0;
+		bv2rgb( r, g, b, bv );
+
+		sPoint point;
+		point.position = wv::cVector3d{ x, y, z } + _center;
+		point.velocity = wv::cVector3d{ vel_x, vel_y, vel_z } + _velocity;
+		point.mass = mass;
+		m_points.push_back( point );
+		m_render_points.push_back( { m_points.back().position, wv::cVector4d{ r, g, b, l } });
+	}
+
+	m_points[ index_offset ].position = _center;
+	m_points[ index_offset ].mass = _black_hole_mass;
+	m_render_points[ index_offset ].position = m_points[ index_offset ].position;
+	m_render_points[ index_offset ].color = { 0.0, 1.0, 0.0, 1.0 };
+}
+
 void cSceneGame::create( void )
 {
 	srand( (int)time( 0 ) );
@@ -49,65 +106,22 @@ void cSceneGame::create( void )
 	m_backend = m_renderer->getBackend();
 	
 	m_octree = new cOctree();
-	m_octree->create( 1.0e21 );
+	m_octree->create( 1.0e22 ); /* create space */
 
-	{ /* create particles */
+	/* note: keep above 2385km */
+	/* no particular reason    */
 
-		const double max_dist = 1.7302642e20;
-		const double speed_deviation = 3.0e2;
-		const double height = 4.0e18;
-		const double min_mass = 1.5911e29;
-		const double max_mass = 3.38147e32;
-
-		const double black_hole_mass = 7.9564e36; /* roughly mass of Sagittarius A* */
-
-		for ( int i = 0; i < 100; i++ )
-		{
-			double t = RANDD( 0, 3.1415 * 2.0 );
-			double max_dist_temp = RANDD( 0, max_dist );
-			double height_temp = RANDD( 0, height );
-			double dist = RANDD( max_dist_temp * 0.01, max_dist_temp );
-			double s = sin( t ) * dist;
-			double c = cos( t ) * dist;
-
-			double mass = RANDD( min_mass, max_mass );
-			double v = 0.0f;
-
-			if( i > 0 )
-				v = sqrt( BIG_G * black_hole_mass / dist ) + RANDD( -speed_deviation, speed_deviation );
-			
-			double s_prim = cos( t );
-			double c_prim = -sin( t );
-
-			/* position */
-			double x = s; // RANDF( -max_dist, max_dist );
-			double y = RANDD( -height_temp, height_temp );
-			double z = c; // RANDF( -max_dist, max_dist );
-
-			/* initial velocity */
-			double vel_x = s_prim * v; // RANDF( -max_speed, max_speed );
-			double vel_y = 0.0; // RANDF( -max_speed * 0.2, max_speed * 0.2 );
-			double vel_z = c_prim * v; // RANDF( -max_speed, max_speed );
-
-			/* star colour */
-			double bv = mapRange( mass, min_mass, max_mass, 2.0, -0.4 );
-			double l = mapRange( mass, min_mass, max_mass, 0.3, 1.0 );
-			double r = 0, g = 0, b = 0;
-			bv2rgb( r, g, b, bv );
-
-			sPoint point;
-			point.position = { x, y, z };
-			point.velocity = { vel_x, vel_y, vel_z };
-			point.mass = mass;
-			m_points.push_back( point );
-			m_render_points.push_back( { m_points[ i ].position, wv::cVector4d{ r, g, b, l } });
-		}
-
-		m_points[ 0 ].position = { 1,1,1 };
-		m_points[ 0 ].mass = black_hole_mass;
-		m_render_points[ 0 ].position = m_points[ 0 ].position;
-		m_render_points[ 0 ].color = { 0.0, 1.0, 0.0, 1.0 };
-	}
+	createGalaxy( { 1.0, 1.0, 1.0 }, { 3000.0, 0.0, 0.0 }, 5000,
+					6.45e20,       /* size */
+					1.5911e29,     /* min mass */
+					3.38147e32,    /* mass max */
+					5.9e38 );      /* black hole mass */
+	
+	createGalaxy( { 4.0e21, 2.0e20, 2.0e20 }, { -1000.0, 0.0, 0.0 }, 1000,
+				  6.45e20,       /* size */
+				  1.5911e29,     /* min mass */
+				  3.38147e32,    /* mass max */
+				  5.9e37 );      /* black hole mass */
 
 	std::string vert = app.loadShaderSource( "../res/star.vert" );
 	std::string geom = app.loadShaderSource( "../res/billboard.geom" );
@@ -198,21 +212,42 @@ void cSceneGame::onRawInput( sInputInfo* _info )
 
 		case 'W':
 			m_input_z += 1;
+			m_track = false;
 			break;
 		case 'S':
 			m_input_z -= 1;
+			m_track = false;
 			break;
 		case 'A':
 			m_input_x += 1;
+			m_track = false;
 			break;
 		case 'D':
 			m_input_x -= 1;
+			m_track = false;
 			break;
 		case 'E':
 			m_input_y -= 1;
+			m_track = false;
 			break;
 		case 'Q':
 			m_input_y += 1;
+			m_track = false;
+			break;
+
+		case 'R':
+			m_track ^= 1;
+			break;
+		case 'F':
+			m_use_octree ^= 1;
+			if ( !m_use_octree && m_display_mode != DisplayMode_Stars )
+				m_display_mode = DisplayMode_Stars;
+			else
+				m_octree->recalculate();
+			break;
+		case 'T':
+			int next_display = m_display_mode + 1;
+			m_display_mode = (eDisplayMode)( next_display % 3 );
 			break;
 		}
 
@@ -260,10 +295,6 @@ void cSceneGame::onRawInput( sInputInfo* _info )
 		case 'Q':
 			m_input_y -= 1;
 			break;
-
-		case 'F':
-			m_use_octree ^= 1;
-			break;
 		}
 	}
 
@@ -277,30 +308,28 @@ void cSceneGame::onRawInput( sInputInfo* _info )
 	}
 }
 
-/* formula derived from https://beltoforion.de/en/barnes-hut-galaxy-simulator/ */
-wv::cVector3<double> computeForce( wv::cVector3d& _1p, wv::cVector3d& _2p, double& _1m, double& _2m )
-{
-	double mm = _1m * _2m;
-	wv::cVector3d rirj = _1p - _2p;
-	double magnitude = rirj.length();
-	return ( rirj / pow( magnitude, 3 ) ) * mm;
-}
-
 void cSceneGame::updateUniverse( double _delta_time )
 {
 	for ( int i = 0; i < m_points.size(); i++ )
 	{
 		wv::cVector3d f;
 
-		for ( int j = 0; j < m_points.size(); j++ )
+		if ( m_use_octree ) /* octree method */
 		{
-			if ( i == j )
-				continue;
+			f -= m_octree->computeForces( m_points[ i ] );
+		}
+		else /* direct summation method */
+		{
+			for ( int j = 0; j < m_points.size(); j++ )
+			{
+				if ( i == j )
+					continue;
 
-			sPoint& m1 = m_points[ i ];
-			sPoint& m2 = m_points[ j ];
+				sPoint& m1 = m_points[ i ];
+				sPoint& m2 = m_points[ j ];
 
-			f -= computeForce( m1.position, m2.position, m1.mass, m2.mass );
+				f -= SpaceMath::computeForce( m1.position, m2.position, m1.mass, m2.mass );
+			}
 		}
 
 		m_points[ i ].velocity += ( f * BIG_G ) / m_points[ i ].mass * _delta_time;
@@ -316,10 +345,45 @@ void cSceneGame::updateUniverse( double _delta_time )
 	if( m_use_octree )
 		m_octree->recalculate();
 
+	if ( m_track )
+	{
+		m_pos_x = ( float )( -m_points[ 0 ].position.x * 3.5e-20);
+		m_pos_y = ( float )( -m_points[ 0 ].position.y * 3.5e-20);
+		m_pos_z = ( float )( -m_points[ 0 ].position.z * 3.5e-20);
+	}
+
+}
+
+void cSceneGame::updateTitle( double _delta_time )
+{
+	cWindow& window = *cApplication::getInstance().getWindow();
+
+	const char* display_mode_str = "NULL";
+	switch ( m_display_mode )
+	{
+	case DisplayMode_Both:
+		display_mode_str = "BOTH";
+		break;
+	case DisplayMode_Octree:
+		display_mode_str = "OCTREE ONLY";
+		break;
+	case DisplayMode_Stars:
+		display_mode_str = "STARS ONLY";
+		break;
+	}
+	window.setTitle( std::format(
+		"N-Body       Particles: {}       Display(T): {}       Use Octree(F): {}       Track(R): {}       FPS: {}",
+		std::to_string( m_points.size() ).c_str(),
+		display_mode_str,
+		( m_use_octree?"TRUE":"FALSE" ),
+		( m_track?"TRUE":"FALSE" ),
+		( 1.0 / _delta_time ) ).c_str() );
 }
 
 void cSceneGame::update( double _delta_time )
 {
+	updateTitle( _delta_time );
+	
 	m_pitch += _delta_time * m_input_pitch;
 	m_yaw += _delta_time * m_input_yaw;
 	m_zoom += _delta_time * m_input_zoom * m_zoom_speed;
@@ -335,7 +399,7 @@ void cSceneGame::update( double _delta_time )
 	m_pos_y += m_input_y * speed;
 
 	if ( m_run )
-		updateUniverse( 3.155e14 );
+		updateUniverse( 4.155e14 );
 
 	/* buffer new data */
 	m_backend->bufferData( m_vertex_buffer, m_render_points.data(), m_render_points.size() * sizeof( sRenderPoint ) );
@@ -364,6 +428,13 @@ void cSceneGame::draw( void )
 	
 	glm::mat4 projection = glm::perspective( glm::radians( 45.0f ), aspect, 0.0000001f, 10000.0f );
 
+	/* draw octree */
+	if ( m_display_mode != DisplayMode_Stars )
+		m_octree->drawNodeTree( scale, view, projection );
+	
+	if ( m_display_mode == DisplayMode_Octree )
+		return;
+
 	/* apply transform uniforms */
 	m_backend->useShaderProgram( m_shader );
 	m_backend->setUniformMat4f( m_model_location, glm::value_ptr( model ) );
@@ -375,9 +446,5 @@ void cSceneGame::draw( void )
 	m_backend->bindVertexArray( m_vertex_array );
 	m_backend->drawArrays( (unsigned int)m_points.size(), eDrawMode::DrawMode_Points );
 	m_backend->bindVertexArray( 0 );
-
-	/* draw octree */
-	if ( m_use_octree )
-		m_octree->drawNodeTree( scale, view, projection );
 
 }

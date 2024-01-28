@@ -95,10 +95,10 @@ void cOctree::drawNodeTree( double _scale, glm::mat4& _view, glm::mat4& _proj )
 	m_backend->setUniformMat4f( m_proj_location, glm::value_ptr( _proj ) );
 	m_backend->bindVertexArray( m_debug_box_vao );
 	
-	m_backend->setUniformVec4f( m_color_location, wv::cVector4f( 0.0f, 1.0f, 0.0f, 0.04f ) );
+	m_backend->setUniformVec4f( m_color_location, wv::cVector4f( 0.0f, 1.0f, 0.0f, 0.05f ) );
 	m_root_node->draw( m_backend, m_model_location, _scale );
 
-	m_backend->setUniformVec4f( m_color_location, wv::cVector4f( 1.0f, 0.0f, 0.0f, 1.0f ) );
+	m_backend->setUniformVec4f( m_color_location, wv::cVector4f( 1.0f, 0.0f, 0.0f, 0.05f ) );
 	m_root_node->drawCOM( m_backend, m_model_location, _scale );
 	
 	m_backend->bindVertexArray( 0 );
@@ -107,4 +107,10 @@ void cOctree::drawNodeTree( double _scale, glm::mat4& _view, glm::mat4& _proj )
 void cOctree::recalculate()
 {
 	m_root_node->recalculateData();
+	m_root_node->recalculateMass( nullptr, nullptr );
+}
+
+wv::cVector3d cOctree::computeForces( sPoint& _point )
+{
+	return m_root_node->computeForces( &_point, 1.5f );
 }

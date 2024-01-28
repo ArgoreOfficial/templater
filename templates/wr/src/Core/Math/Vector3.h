@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 namespace wv
 {
 
@@ -15,7 +17,7 @@ namespace wv
 		cVector3( const T& _t ) : x( _t ), y( _t ), z( _t ){}
 		cVector3( const T& _x, const T& _y, const T& _z ) : x( _x ), y( _y ), z( _z ){}
 
-		T length() { return sqrt( x * x + y * y + z * z ); }
+		T length() { return std::sqrt( x * x + y * y + z * z ); }
 
 		cVector3< T >& operator = ( const cVector3< T >& _other );
 		cVector3< T >& operator +=( const cVector3< T >& _other );

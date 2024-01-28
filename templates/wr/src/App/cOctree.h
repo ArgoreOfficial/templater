@@ -26,6 +26,8 @@ public:
 	void drawNodeTree( double _scale, glm::mat4& _view, glm::mat4& _proj );
 	void recalculate();
 
+	wv::cVector3d computeForces( sPoint& _point );
+
 private:
 	
 	cRenderer* m_renderer;

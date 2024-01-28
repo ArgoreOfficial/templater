@@ -24,6 +24,10 @@ public:
 	void clearChildren();
 	void recalculateData();
 	void accumulatePointMass();
+	void recalculateMass( double* _out_mass, wv::cVector3d* _out_com );
+
+	wv::cVector3d computeForces( sPoint* _point, const float& _theta );
+
 	void draw( iBackend* _backend, int& _model_loc, double _scale );
 	void drawCOM( iBackend* _backend, int& _model_loc, double _scale );
 
@@ -34,7 +38,7 @@ public:
 	wv::cVector3d com;                   /* center of mass */
 	wv::cVector3d center{ 0.0, 0.0, 0.0 }; /* center of node */
 	double size = 0.0;
-	double combined_mass = 0.0;
+	double mass = 0.0;
 
 	sPoint* data = nullptr;
 

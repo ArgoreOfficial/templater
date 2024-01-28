@@ -11,11 +11,20 @@
 
 struct sInputInfo;
 
+enum eDisplayMode
+{
+	DisplayMode_Stars,
+	DisplayMode_Octree,
+	DisplayMode_Both
+};
+
 class cSceneGame : public iScene
 {
 public:
 	 cSceneGame( void ) { };
 	~cSceneGame( void ) { };
+
+	void createGalaxy( wv::cVector3d _center, wv::cVector3d _velocity, unsigned int _stars, const double _size, const double _mass_min, const double _mass_max, const double _black_hole_mass );
 
 	void create( void ) override;
 	void destroy( void ) override;
@@ -23,8 +32,10 @@ public:
 	void onRawInput( sInputInfo* _info ) override;
 
 	void updateUniverse( double _delta_time );
+	void updateTitle( double _delta_time );
 
 	void update( double _delta_time ) override;
+
 	void draw( void ) override;
 
 private:
@@ -65,6 +76,9 @@ private:
 	
 	bool m_run = false;
 	bool m_use_octree = false;
+	bool m_track = false;
+	
+	eDisplayMode m_display_mode = DisplayMode_Stars;
 
 	std::vector<sPoint> m_points;
 	std::vector<sRenderPoint> m_render_points;
