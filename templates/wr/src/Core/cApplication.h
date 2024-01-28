@@ -7,6 +7,17 @@ class iScene;
 #include <Core/Misc/iSingleton.h>
 #include <string>
 
+struct sInputInfo
+{
+	int key;
+	int scancode;
+	int mods;
+
+	bool buttondown;
+	bool buttonup;
+	bool repeat;
+};
+
 class cApplication : public iSingleton<cApplication>
 {
 public:
@@ -21,6 +32,8 @@ public:
 
 	void onCreate() override;
 	void onResize( int _width, int _height );
+	void onRawInput( sInputInfo* _info );
+
 	cWindow* getWindow() { return m_window; }
 	void run    ( void );
 	cRenderer* getRenderer() { return m_renderer; }

@@ -16,6 +16,7 @@ enum eShaderType
 	Shader_None = 0,
 	Shader_Vertex, 
 	Shader_Fragment,
+	Shader_Geometry,
 	Shader_Compute /* not implemented */
 };
 

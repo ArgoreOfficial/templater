@@ -4,11 +4,9 @@
 #include <Core/Renderer/Framework/cVertexLayout.h>
 #include <Core/cWindow.h>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include <string>
+
+#include <App/cNode.h>
 
 cOctree::cOctree()
 {
@@ -16,9 +14,11 @@ cOctree::cOctree()
 
 cOctree::~cOctree()
 {
+	delete m_root_node;
+	m_root_node = nullptr;
 }
 
-void cOctree::create()
+void cOctree::create( const double& _size )
 {
 	cApplication& app = cApplication::getInstance();
 	m_renderer = app.getRenderer();
@@ -41,12 +41,16 @@ void cOctree::create()
 		-0.5, -0.5, -0.5,   -0.5,  0.5, -0.5
 	};
 
-	std::string frag = app.loadShaderSource( "../res/debug_lines.frag" );
 	std::string vert = app.loadShaderSource( "../res/debug_lines.vert" );
-	sShader frag_shader = m_renderer->createShader( frag.data(), eShaderType::Shader_Fragment );
+	std::string frag = app.loadShaderSource( "../res/debug_lines.frag" );
 	sShader vert_shader = m_renderer->createShader( vert.data(), eShaderType::Shader_Vertex );
+	sShader frag_shader = m_renderer->createShader( frag.data(), eShaderType::Shader_Fragment );
 
-	m_box_shader = m_backend->createShaderProgram( frag_shader, vert_shader );
+	m_box_shader = m_backend->createShaderProgram();
+	m_backend->attachShader( m_box_shader, vert_shader );
+	m_backend->attachShader( m_box_shader, frag_shader );
+	m_backend->linkShaderProgram( m_box_shader );
+	m_size = _size;
 
 	/* create vertex array */
 	m_debug_box_vao = m_backend->createVertexArray();
@@ -64,40 +68,43 @@ void cOctree::create()
 	m_model_location = m_backend->getUniformLocation( m_box_shader, "model" );
 	m_view_location = m_backend->getUniformLocation( m_box_shader, "view" );
 	m_proj_location = m_backend->getUniformLocation( m_box_shader, "proj" );
+	m_color_location = m_backend->getUniformLocation( m_box_shader, "uColor" );
 
-
+	m_root_node = new cNode( nullptr, m_size );
 }
 
-void cOctree::drawNodeTree()
+cNode* cOctree::addPoint( sPoint* _point )
+{
+	cNode* node = m_root_node->findEmptyNode( _point->position );
+	
+	while ( !node->is_leaf || node->data )
+		node = node->findEmptyNode( _point->position );
+	
+	node->data = _point;
+	node->accumulatePointMass();
+	return node;
+}
+
+void cOctree::drawNodeTree( double _scale, glm::mat4& _view, glm::mat4& _proj )
 {
 	cWindow& window = *cApplication::getInstance().getWindow();
-
-	const double scale = 20.0;
-
-	float aspect = window.getAspect();
-
-	/* create transforms */
-
-	glm::mat4 model = glm::mat4( 1.0f );
-	model *= glm::scale( model, glm::vec3{ scale, scale * 0.2, scale } );
-
-	glm::mat4 view = glm::mat4( 1.0f );
-	view = glm::lookAt( glm::vec3{ 25.0f, 15.0f, 30.0f }, glm::vec3{ 0.0f, 0.0f, 0.0f }, glm::vec3{ 0.0f, 1.0f, 0.0f } );
-	//view = glm::lookAt( glm::vec3{ 0.0f, 70.0f, 0.0f }, glm::vec3{ 0.0f, 0.0f, 0.0f }, glm::vec3{ 1.0f, 0.0f, 0.0f } );
-
-	glm::mat4 projection = glm::mat4( 1.0f );
-	projection = glm::perspective( glm::radians( 45.0f ), aspect, 0.1f, 100.0f );
-
-	/* apply transform uniforms */
+	const float aspect = window.getAspect();
 
 	m_backend->useShaderProgram( m_box_shader );
-	m_backend->setUniformMat4f( m_model_location, glm::value_ptr( model ) );
-	m_backend->setUniformMat4f( m_view_location, glm::value_ptr( view ) );
-	m_backend->setUniformMat4f( m_proj_location, glm::value_ptr( projection ) );
-
-	/* draw call */
-
+	m_backend->setUniformMat4f( m_view_location, glm::value_ptr( _view ) );
+	m_backend->setUniformMat4f( m_proj_location, glm::value_ptr( _proj ) );
 	m_backend->bindVertexArray( m_debug_box_vao );
-	m_backend->drawArrays( 72 / 3, eDrawMode::DrawMode_Lines );
+	
+	m_backend->setUniformVec4f( m_color_location, wv::cVector4f( 0.0f, 1.0f, 0.0f, 0.04f ) );
+	m_root_node->draw( m_backend, m_model_location, _scale );
+
+	m_backend->setUniformVec4f( m_color_location, wv::cVector4f( 1.0f, 0.0f, 0.0f, 1.0f ) );
+	m_root_node->drawCOM( m_backend, m_model_location, _scale );
+	
 	m_backend->bindVertexArray( 0 );
+}
+
+void cOctree::recalculate()
+{
+	m_root_node->recalculateData();
 }

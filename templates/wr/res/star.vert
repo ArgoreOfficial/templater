@@ -8,9 +8,15 @@ uniform mat4 view;
 uniform mat4 model;
 
 out vec4 color;
+out float dist;
 
 void main()
 {
-   gl_Position = proj * view * model * vec4(aPos, 1.0);
+   vec4 pos = view * model * vec4(aPos, 1.0);
+
    color = aColor;
+   dist = length( pos );
+   
+   gl_PointSize = 1;
+   gl_Position = proj * pos;
 }

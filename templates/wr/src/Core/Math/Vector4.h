@@ -27,6 +27,7 @@ namespace wv
 ///////////////////////////////////////////////////////////////////////////////////////
 
 	typedef cVector4< float > cVector4f;
+	typedef cVector4< double > cVector4d;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -53,13 +54,13 @@ namespace wv
 	template< typename T >
 	inline cVector4< T > cVector4< T >::operator+( const cVector4< T >& _other )
 	{
-		return cVector2< T >( x + _other.x, y + _other.y, z + _other.z, w + _other.w );
+		return cVector4< T >( x + _other.x, y + _other.y, z + _other.z, w + _other.w );
 	}
 
 	template< typename T >
 	inline cVector4< T > wv::cVector4< T >::operator*( const float & _scalar )
 	{
-		return cVector2< T >( x * _scalar, y * _scalar, z * _scalar, w * _scalar );
+		return cVector4< T >( x * _scalar, y * _scalar, z * _scalar, w * _scalar );
 	}
 
 	template< typename T >
@@ -75,7 +76,7 @@ namespace wv
 	template< typename T >
 	inline cVector4< T > wv::cVector4< T >::operator/( const float & _scalar )
 	{
-		return cVector2< T >( x / _scalar, y / _scalar, z / _scalar, w / _scalar );
+		return cVector4< T >( x / _scalar, y / _scalar, z / _scalar, w / _scalar );
 	}
 
 	template< typename T >

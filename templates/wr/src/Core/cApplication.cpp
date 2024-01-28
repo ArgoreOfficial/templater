@@ -36,6 +36,11 @@ void cApplication::onResize( int _width, int _height )
 	m_window->onResize( _width, _height );
 }
 
+void cApplication::onRawInput( sInputInfo* _info )
+{
+	m_scene->onRawInput( _info );
+}
+
 void cApplication::run()
 {
 	double time = m_window->getTime();;

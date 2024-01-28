@@ -6,6 +6,7 @@ class cVertexLayout;
 #include <Core/Renderer/Framework/Shader.h>
 #include <Core/Renderer/Framework/Buffer.h>
 #include <Core/Renderer/Framework/VertexArray.h>
+#include <Core/Math/Vector4.h>
 
 enum eDrawMode
 {
@@ -29,9 +30,12 @@ public:
 	virtual void endFrame  ( void ) { }
 
 	virtual sShader createShader( const char* _source, eShaderType _type ) { return { 0, eShaderType::Shader_None }; }
-	virtual hShaderProgram createShaderProgram( sShader& _vertex_shader, sShader& _fragment_shader ) { return 0; }
+	virtual hShaderProgram createShaderProgram() { return 0; }
 	virtual sBuffer createBuffer( eBufferType _type ) { return { 0, eBufferType::Buffer_None }; }
 	virtual hVertexArray createVertexArray() { return 0; }
+
+	virtual void attachShader( hShaderProgram& _program, sShader& _shader ) {}
+	virtual void linkShaderProgram( hShaderProgram& _program ) { }
 
 	virtual void bufferData( sBuffer& _buffer, void* _data, size_t _size ) { }
 
@@ -44,7 +48,9 @@ public:
 
 	virtual int getUniformLocation( hShaderProgram _shader, const char* _uniform ) { return -1; }
 	virtual void setUniformMat4f( int _location, float* _matrix_ptr ) { }
-
+	virtual void setUniformFloat( int _location, float _float ) { }
+	virtual void setUniformVec4f( int _location, wv::cVector4<float> _vector ) { }
+	virtual void setUniformVec4d( int _location, wv::cVector4<double> _vector ) { }
 protected:
 	iBackend() { }
 

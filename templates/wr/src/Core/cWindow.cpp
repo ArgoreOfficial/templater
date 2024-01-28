@@ -4,6 +4,21 @@
 
 #include <stdio.h>
 
+void keyCallback( GLFWwindow* _window, int _key, int _scancode, int _action, int _mods )
+{
+	sInputInfo* info = new sInputInfo();
+	info->buttondown = _action == GLFW_PRESS;
+	info->buttonup = _action == GLFW_RELEASE;
+	info->repeat = _action == GLFW_REPEAT;
+	info->key = _key;
+	info->scancode = _scancode;
+	info->mods = _mods;
+
+	cApplication::getInstance().onRawInput( info );
+
+	delete info;
+}
+
 void onResizeCallback( GLFWwindow* window, int _width, int _height )
 {
 	cApplication::getInstance().onResize( _width, _height );
@@ -50,7 +65,7 @@ int cWindow::create( unsigned int _width, unsigned int _height, const char* _tit
 	glfwMakeContextCurrent( m_window_object );
 
 	glfwSetFramebufferSizeCallback( m_window_object, onResizeCallback );
-
+	glfwSetKeyCallback( m_window_object, keyCallback );
 	m_width = _width;
 	m_height = _height;
 

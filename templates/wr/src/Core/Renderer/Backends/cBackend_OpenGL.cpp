@@ -44,6 +44,9 @@ void cBackend_OpenGL::create( cWindow& _window )
 	printf( "   Version (integer) : %d.%d\n", major, minor );
 	printf( "   GLSL Version      : %s\n", glslVersion );
 
+	glEnable( GL_BLEND );
+	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	glEnable( GL_PROGRAM_POINT_SIZE );
 }
 
 void cBackend_OpenGL::clear( unsigned int _color )
@@ -76,6 +79,9 @@ sShader cBackend_OpenGL::createShader( const char* _source, eShaderType _type )
 	case Shader_Fragment:
 		shader = glCreateShader( GL_FRAGMENT_SHADER );
 		break;
+	case Shader_Geometry:
+		shader = glCreateShader( GL_GEOMETRY_SHADER );
+		break;
 	default:
 		return { 0, eShaderType::Shader_None };
 		break;
@@ -94,28 +100,9 @@ sShader cBackend_OpenGL::createShader( const char* _source, eShaderType _type )
 	return { shader, _type };
 }
 
-hShaderProgram cBackend_OpenGL::createShaderProgram( sShader& _vertex_shader, sShader& _fragment_shader )
+hShaderProgram cBackend_OpenGL::createShaderProgram()
 {
-	int  success;
-	char infoLog[ 512 ];
 	hShaderProgram program = glCreateProgram();
-
-	unsigned int vert = _vertex_shader.handle;
-	unsigned int frag = _fragment_shader.handle;
-
-	glAttachShader( program, vert );
-	glAttachShader( program, frag );
-	glLinkProgram( program );
-
-	glGetProgramiv( program, GL_LINK_STATUS, &success );
-	if ( !success )
-	{
-		glGetProgramInfoLog( program, 512, NULL, infoLog );
-		printf( "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n %s \n", infoLog );
-	}
-
-	glDeleteShader( vert );
-	glDeleteShader( frag );
 
 	return program;
 }
@@ -153,6 +140,27 @@ hVertexArray cBackend_OpenGL::createVertexArray()
 	hVertexArray vertex_array;
 	glGenVertexArrays( 1, &vertex_array );
 	return vertex_array;
+}
+
+void cBackend_OpenGL::attachShader( hShaderProgram& _program, sShader& _shader )
+{
+	unsigned int frag = _shader.handle;
+	glAttachShader( _program, frag );
+}
+
+void cBackend_OpenGL::linkShaderProgram( hShaderProgram& _program )
+{
+	int  success;
+	char infoLog[ 512 ];
+
+	glLinkProgram( _program );
+
+	glGetProgramiv( _program, GL_LINK_STATUS, &success );
+	if ( !success )
+	{
+		glGetProgramInfoLog( _program, 512, NULL, infoLog );
+		printf( "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n %s \n", infoLog );
+	}
 }
 
 void cBackend_OpenGL::useShaderProgram( hShaderProgram _program )
@@ -199,7 +207,7 @@ void cBackend_OpenGL::bindVertexLayout( cVertexLayout& _layout )
 
 		glEnableVertexAttribArray( i );
 		glVertexAttribPointer( i, element.count, type, false, _layout.getStride(), (const void*)offset );
-		offset += element.count * element.size;
+		offset += element.count * (unsigned int)element.size;
 	}
 }
 
@@ -244,4 +252,19 @@ int cBackend_OpenGL::getUniformLocation( hShaderProgram _shader, const char* _un
 void cBackend_OpenGL::setUniformMat4f( int _location, float* _matrix_ptr )
 {
 	glUniformMatrix4fv( _location, 1, GL_FALSE, _matrix_ptr );
+}
+
+void cBackend_OpenGL::setUniformFloat( int _location, float _float )
+{
+	glUniform1f( _location, _float );
+}
+
+void cBackend_OpenGL::setUniformVec4f( int _location, wv::cVector4<float> _vector )
+{
+	glUniform4f( _location, _vector.x, _vector.y, _vector.z, _vector.w );
+}
+
+void cBackend_OpenGL::setUniformVec4d( int _location, wv::cVector4<double> _vector )
+{
+	glUniform4d( _location, _vector.x, _vector.y, _vector.z, _vector.w );
 }

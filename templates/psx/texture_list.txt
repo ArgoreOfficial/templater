@@ -1,4 +1,3 @@
-psn00bsdk_target_incbin(game PRIVATE tengine_128 res/tengine_128.tim) 
-psn00bsdk_target_incbin(game PRIVATE tengine_64 res/tengine_64.tim) 
-psn00bsdk_target_incbin(game PRIVATE tim_texture res/tengine_128.tim) 
-psn00bsdk_target_incbin(game PRIVATE texture64 res/texture64.tim) 
+psn00bsdk_target_incbin(game PRIVATE tim_nicklas res/nicklas.tim) 
+psn00bsdk_target_incbin(game PRIVATE tim_texture64 res/texture64.tim) 
+psn00bsdk_target_incbin(game PRIVATE tim_tim_texture res/tim_texture.tim) 

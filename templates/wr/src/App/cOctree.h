@@ -7,14 +7,13 @@
 #include <Core/Renderer/Framework/Buffer.h>
 #include <Core/Renderer/Framework/VertexArray.h>
 
-struct sNode
-{
-	sNode* children[ 8 ] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-	unsigned short child_pointer;
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-	wv::cVector3<double> com;
-	double mass;
-};
+#include <App/sPoint.h>
+
+class cNode;
 
 class cOctree
 {
@@ -22,15 +21,17 @@ public:
 	 cOctree();
 	~cOctree();
 
-	void create();
-	void drawNodeTree();
+	void create( const double& _size );
+	cNode* addPoint( sPoint* _point );
+	void drawNodeTree( double _scale, glm::mat4& _view, glm::mat4& _proj );
+	void recalculate();
 
 private:
 	
 	cRenderer* m_renderer;
 	iBackend* m_backend;
 
-	sNode* m_root_node;
+	cNode* m_root_node = nullptr;
 
 	hShaderProgram m_box_shader;
 
@@ -38,7 +39,10 @@ private:
 	sBuffer m_debug_box_vbo;
 
 	int m_model_location = -1;
-	int m_view_location = -1;
-	int m_proj_location = -1;
+	int m_view_location  = -1;
+	int m_proj_location  = -1;
+	int m_color_location = -1;
+	
+	double m_size = 1.0;
 
 };

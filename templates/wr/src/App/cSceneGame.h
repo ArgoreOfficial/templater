@@ -4,60 +4,12 @@
 
 #include <Core/Renderer/Backends/iBackend.h>
 #include <Core/Renderer/cRenderer.h>
+#include <Core/Math/Vector2.h>
 #include <vector>
 
 #include <App/cOctree.h>
 
-class cVector3f
-{
-public:
-	cVector3f():
-		x{ 0.0f }, y{ 0.0f }, z{ 0.0f }
-	{ }
-
-	cVector3f( double _x, double _y, double _z ) :
-		x{ _x }, y{ _y }, z{ _z }
-	{ }
-
-
-	~cVector3f() { }
-
-	cVector3f operator+( const cVector3f& _other ) { return { x + _other.x, y + _other.y, z + _other.z }; }
-	cVector3f operator-( const cVector3f& _other ) { return { x - _other.x, y - _other.y, z - _other.z }; }
-
-	cVector3f& operator+=( const cVector3f& _other ) 
-	{ 
-		this->x += _other.x; 
-		this->y += _other.y; 
-		this->z += _other.z; 
-		return *this;
-	}
-
-	cVector3f& operator-=( const cVector3f& _other )
-	{
-		this->x -= _other.x;
-		this->y -= _other.y;
-		this->z -= _other.z;
-		return *this;
-	}
-
-	cVector3f operator*( const double& _scalar ) { return { x * _scalar, y * _scalar, z * _scalar }; }
-	cVector3f operator/( const double& _scalar ) { return { x / _scalar, y / _scalar, z / _scalar }; }
-
-	double x = 0.0f;
-	double y = 0.0f;
-	double z = 0.0f;
-
-
-};
-
-struct sPoint
-{
-	cVector3f position;
-	cVector3f velocity;
-	double mass;
-	cVector3f color;
-};
+struct sInputInfo;
 
 class cSceneGame : public iScene
 {
@@ -67,6 +19,11 @@ public:
 
 	void create( void ) override;
 	void destroy( void ) override;
+
+	void onRawInput( sInputInfo* _info ) override;
+
+	void updateUniverse( double _delta_time );
+
 	void update( double _delta_time ) override;
 	void draw( void ) override;
 
@@ -78,13 +35,37 @@ private:
 	int m_model_location;
 	int m_view_location;
 	int m_proj_location;
+	int m_focal_length_location;
 
 	hShaderProgram m_shader;
 
 	hVertexArray m_vertex_array;
 	sBuffer m_vertex_buffer;
 
-	cOctree m_octree;
+	cOctree* m_octree = nullptr;
+
+	float m_focal_length = 1.0f;
+
+	float m_pitch = 0.0f;
+	float m_yaw   = 0.0f;
+	float m_zoom  = 25.0f;
+	float m_zoom_speed = 20.0f;
+
+	float m_pos_x = 0.0f;
+	float m_pos_z = 0.0f;
+	float m_pos_y = 0.0f;
+
+	int m_input_pitch = 0;
+	int m_input_yaw   = 0;
+	int m_input_zoom  = 0;
+
+	int m_input_x = 0;
+	int m_input_z = 0;
+	int m_input_y = 0;
+	
+	bool m_run = false;
+	bool m_use_octree = false;
 
 	std::vector<sPoint> m_points;
+	std::vector<sRenderPoint> m_render_points;
 };

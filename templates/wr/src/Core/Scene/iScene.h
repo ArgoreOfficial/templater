@@ -1,5 +1,7 @@
 #pragma once
 
+struct sInputInfo;
+
 class iScene
 {
 public:
@@ -9,7 +11,7 @@ public:
 	virtual void destroy( void ) { }
     virtual void update( double _delta_time ) { }
     virtual void draw  ( void ) { }
-
+	virtual void onRawInput( sInputInfo* _info ) { };
 protected:
     iScene( void ) { }
 

@@ -21,7 +21,7 @@ public:
 	unsigned int getWidth() { return m_width; }
 	unsigned int getHeight() { return m_height; }
 	float getAspect();
-
+	
 	void onResize( int _width, int _height );
 
 	GLFWwindow* const getWindowObject( void ) { return m_window_object; }

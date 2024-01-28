@@ -8,5 +8,5 @@ goto :eof
 :tex_list
 set "path=%2"
 set "path=%path:\=/%"
-echo psn00bsdk_target_incbin(game PRIVATE %1 %path%) >> texture_list.txt
+echo psn00bsdk_target_incbin(game PRIVATE tim_%1 %path%) >> texture_list.txt
 goto :eof

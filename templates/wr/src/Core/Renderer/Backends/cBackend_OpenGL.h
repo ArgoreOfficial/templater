@@ -15,9 +15,12 @@ public:
 	void onResize( int _width, int _height ) override;
 
 	sShader createShader( const char* _source, eShaderType _type ) override;
-	hShaderProgram createShaderProgram( sShader& _vertex_shader, sShader& _fragment_shader ) override;
+	hShaderProgram createShaderProgram() override;
 	sBuffer createBuffer( eBufferType _type ) override;
 	hVertexArray createVertexArray() override;
+
+	void attachShader( hShaderProgram& _program, sShader& _shader ) override;
+	void linkShaderProgram( hShaderProgram& _program ) override;
 
 	void useShaderProgram( hShaderProgram _program ) override;
 	void bufferData( sBuffer& _buffer, void* _data, size_t _size ) override;
@@ -30,6 +33,9 @@ public:
 
 	int getUniformLocation( hShaderProgram _shader, const char* _uniform ) override;
 	void setUniformMat4f( int _location, float* _matrix_ptr ) override;
+	void setUniformFloat( int _location, float _float ) override;
+	void setUniformVec4f( int _location, wv::cVector4<float> _vector ) override;
+	void setUniformVec4d( int _location, wv::cVector4<double> _vector ) override;
 
 private:
 

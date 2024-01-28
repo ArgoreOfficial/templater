@@ -62,5 +62,8 @@ void cRenderer::createDefaultShader( void )
 {
 	sShader vertex_shader = m_backend->createShader( m_shader_default_vert, eShaderType::Shader_Vertex );
 	sShader fragment_shader = m_backend->createShader( m_shader_default_frag, eShaderType::Shader_Fragment );
-	m_shader_default = m_backend->createShaderProgram( vertex_shader, fragment_shader );
+	m_shader_default = m_backend->createShaderProgram();
+	m_backend->attachShader( m_shader_default, vertex_shader );
+	m_backend->attachShader( m_shader_default, fragment_shader );
+	m_backend->linkShaderProgram( m_shader_default );
 }
