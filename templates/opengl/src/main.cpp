@@ -8,7 +8,7 @@ int main()
 	cWindow window;
 	cRenderer renderer;
 
-	window.create( 800, 600, "Tengine.exe" );
+	window.create( 800, 600, "OpenGL.exe" );
 	renderer.create( window );
 
 	float vertices[] = {
