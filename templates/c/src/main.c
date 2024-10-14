@@ -7,7 +7,7 @@
 
 int main()
 {
-	printf( "C++\n" );
+	printf( "C\n" );
 
 	return 0;
 }
