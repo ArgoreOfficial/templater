@@ -2,8 +2,8 @@
 --! @file xmake.lua
 --! @author Argore
 --! @brief Template C++ configuration
---! @version 0.1
---! @date 2025-04-04
+--! @version 0.2
+--! @date 2025-11-28
 --! 
 --! @copyright Copyright (c) 2025 Argore
 ---------------------------------
@@ -13,11 +13,26 @@ set_languages("clatest", "cxxlatest")
 add_rules "mode.debug"
 add_rules "mode.release"
 
-target "C++ Project"
+--add_requires("nlohmann_json")
+
+local PROJECT_NAME = "CppProject"
+
+target(PROJECT_NAME)
     set_kind "binary" 
     
-    set_basename "cpp_project_$(mode)_$(arch)"
+    --add_packages("nlohmann_json")
 
+    if is_mode("debug") then
+        set_basename(PROJECT_NAME .. "_debug_$(arch)")
+        set_configdir("bin/dat")
+    else 
+        set_basename(PROJECT_NAME)
+        set_configdir("package/bin/dat")
+    end
+
+    add_configfiles("dat/*", {onlycopy = true})
+    
+    
     set_targetdir "bin"
     set_objectdir "build/obj"
     
